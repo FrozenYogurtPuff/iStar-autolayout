@@ -17,7 +17,10 @@
   },
   "homepage": "https://github.com/FrozenYogurtPuff/iStar-autolayout#readme",
   "dependencies": {
-    "d3": "^4.13.0",
+    "d3-force": "^1.1.0",
     "lodash": "^4.17.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.1.0"
   }
 }
