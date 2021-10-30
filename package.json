@@ -1,0 +1,19 @@
+{
+  "name": "istar-autolayout",
+  "version": "1.0.0",
+  "description": "🌟 An auto layout algorithm method for iStar models.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FrozenYogurtPuff/iStar-autolayout.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FrozenYogurtPuff/iStar-autolayout/issues"
+  },
+  "homepage": "https://github.com/FrozenYogurtPuff/iStar-autolayout#readme"
+}
