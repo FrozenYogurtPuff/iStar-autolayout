@@ -7,6 +7,7 @@
     "webpack": "webpack --config ./webpack.config.js",
     "webpack-example": "webpack --config ./examples/webpack.config.js"
   },
+  "files": ["index.js", "src/*.js"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/FrozenYogurtPuff/iStar-autolayout.git"
