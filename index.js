@@ -1,1 +1,1 @@
-export { layout as istarLayout } from './layout'
+export { layout as istarLayout } from './src/layout'
