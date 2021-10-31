@@ -4,7 +4,8 @@
   "description": "🌟 An auto layout algorithm method for iStar models.",
   "main": "index.js",
   "scripts": {
-    "webpack": "webpack --config ./examples/webpack.config.js"
+    "webpack": "webpack --config ./webpack.config.js",
+    "webpack-example": "webpack --config ./examples/webpack.config.js"
   },
   "repository": {
     "type": "git",
