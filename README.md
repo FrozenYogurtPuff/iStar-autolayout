@@ -20,6 +20,7 @@ Please refer to [examples](https://github.com/FrozenYogurtPuff/iStar-autolayout/
 
 ### Optional options
 ```javascript
+// All the fields are optional
 const options = {
   layout: {
     mode: 'generator' | 'array' | 'first' | 'last',
@@ -48,7 +49,8 @@ const options = {
 import { istarLayout } from 'iStar-autolayout'
 import model from 'model.json'
 
-const generator = istarLayout(model, null)()
+const options = null
+const generator = istarLayout(model, options)()
 let result = generator.next()
 while (!result.done) {
   const { currentEpoch, nodes, links } = result.value
