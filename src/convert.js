@@ -1,17 +1,42 @@
 import { nodeName, nodeSize, linkName } from './dictionary'
 import _ from 'lodash'
 
-export function convert (d, options) {
-  const data = _.cloneDeep(d)
-  const mode = options.mode ? options.mode : 'piStar'
+/**
+ * Convert different format JSON into ordered nodes and links list.
+ * @param data {object} - a piStar-format or d3-format JSON, depending on the value of options.mode
+ * @param options {object} - convert options
+ * @param options.mode {string} - 'piStar' or 'd3'
+ * @param options.nodeName {string} - mapping piStar's node describe to standard format
+ * @param options.nodeSize {string} - a dictionary about node size in piStar
+ * @param options.linkName {string} - mapping piStar's link describe to standard format
+ * @returns { {width, graph: {node: [], link: []}, height} }
+ */
+export function convert (data, options) {
+  data = _.cloneDeep(data)
+  const mode = options?.mode ?? 'piStar'
   const graph = { node: [], link: [] }
 
   if (mode === 'piStar') {
+    /**
+     * Push the content into container when valid
+     * @param container
+     * @param content
+     */
     function insert (container, content) {
       if (content) {
         container.push(content)
       }
     }
+
+    /**
+     * Handle various element based on its type
+     * @param obj {Object} - the source element item
+     * @param type {String} - element type, usually 'link' or 'node'
+     * @return { {r: number, collapsed: boolean | null, name: string, x: number, y: number,
+     *           id: string, type: string, width: number, height: number} |
+     *         {name: string, id: string, type: string, source: string, target: string} |
+     *         null }
+     */
     function assign (obj, type) {
       if (type === 'link') {
         const id = obj.id
@@ -71,9 +96,9 @@ export function convert (d, options) {
     const width = data.diagram.width
     const height = data.diagram.height
 
-    const nodeNameDict = options.nodeName ? options.nodeName : nodeName
-    const nodeSizeDict = options.nodeSize ? options.nodeSize : nodeSize
-    const linkNameDict = options.linkName ? options.linkName : linkName
+    const nodeNameDict = options?.nodeName ?? nodeName
+    const nodeSizeDict = options?.nodeSize ?? nodeSize
+    const linkNameDict = options?.linkName ?? linkName
 
     for (const d in data.dependencies) { insert(graph.node, assign(data.dependencies[d], 'node')) }
     for (const a in data.actors) { insert(graph.node, assign(data.actors[a], 'node')) }
