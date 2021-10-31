@@ -4,7 +4,7 @@
   "description": "🌟 An auto layout algorithm method for iStar models.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "webpack": "webpack --config ./examples/webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -21,10 +21,14 @@
     "lodash": "^4.17.0"
   },
   "devDependencies": {
+    "d3-selection": "^3.0.0",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.1"
+    "eslint-plugin-promise": "^5.1.1",
+    "terser-webpack-plugin": "^5.2.4",
+    "webpack": "^5.61.0",
+    "webpack-cli": "^4.9.1"
   }
 }
