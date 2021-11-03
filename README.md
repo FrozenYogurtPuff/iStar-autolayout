@@ -1,4 +1,5 @@
 # iStar-autolayout
+[![npm version](https://badge.fury.io/js/istar-autolayout.svg)](https://badge.fury.io/js/istar-autolayout)
 > 🌟 An auto layout algorithm method for iStar models.
 
 ## Dependencies
