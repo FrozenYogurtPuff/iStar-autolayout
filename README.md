@@ -46,7 +46,7 @@ const options = {
 ```
 ### Getting Started
 ```javascript
-import { istarLayout } from 'iStar-autolayout'
+import { istarLayout } from 'istar-autolayout'
 import model from 'model.json'
 
 const options = null
