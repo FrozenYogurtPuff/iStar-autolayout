@@ -8,7 +8,7 @@
 ## Install
 ### via npm
 ```bash
-$ npm -i iStar-autolayout
+$ npm -i istar-autolayout
 ```
 ### via Git
 ```bash
