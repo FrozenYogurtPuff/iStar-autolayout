@@ -5,7 +5,7 @@ import _ from 'lodash'
 /**
  * Main entrypoint for layout handling
  * @param data {object} - a piStar-format or d3-format JSON
- * @param options {object} - the options collection
+ * @param options {object | null} - the options collection
  *
  * @param options.layout {object} - layout options
  * @param options.layout.mode {string} - layout return data format, usually 'generator', 'array', 'first' or 'last'
