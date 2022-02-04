@@ -1,0 +1,10 @@
+# all json
+**/*.json
+
+# current folder config
+*.js
+
+# compile
+dist/*
+examples/*
+!examples/demo.ts
