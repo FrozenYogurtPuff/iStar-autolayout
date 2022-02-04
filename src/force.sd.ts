@@ -1,4 +1,4 @@
-import * as d3 from 'd3-force'
+import * as d3 from "d3-force";
 
 /**
  * Use d3-force to implement the force layout algorithm
@@ -10,11 +10,11 @@ import * as d3 from 'd3-force'
  * @param options.radius {number} - a common radius for tuning parameters
  * @return { {simulation: object, nodes: [], links: []} }
  */
-export function force (data, options) {
-  const nodes = data.node
-  const links = data.link
-  const value = options?.forceValue ?? 50
-  const [width, height] = [options.width, options.height]
+export function force(data, options) {
+  const nodes = data.node;
+  const links = data.link;
+  const value = options?.forceValue ?? 50;
+  const [width, height] = [options.width, options.height];
   // const radius = options?.commonRadius ?? 50
 
   // function boxingForce () {
@@ -28,22 +28,35 @@ export function force (data, options) {
   //   }
   // }
 
-  const simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id(d => d.id).distance(l => (l.source.r + l.target.r)))
-    .force('charge', d3.forceManyBody()
-      .distanceMin(value * 2)
-      .distanceMax(value * 10)
-      .strength(-value * 20))
+  const simulation = d3
+    .forceSimulation(nodes)
+    .force(
+      "link",
+      d3
+        .forceLink(links)
+        .id((d) => d.id)
+        .distance((l) => l.source.r + l.target.r)
+    )
+    .force(
+      "charge",
+      d3
+        .forceManyBody()
+        .distanceMin(value * 2)
+        .distanceMax(value * 10)
+        .strength(-value * 20)
+    )
     // .force('charge', d3.forceManyBody()
     //   .distanceMin(d => d.r)
     //   .distanceMax(d => d.r * 5)
     //   .strength(d => Math.sqrt(d.r) * -1))
     // .force('radius', d3.forceCollide(radius * 1.25))
-    .force('radius', d3.forceCollide()
-      .radius(d => d.r * 1.2))
-    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force(
+      "radius",
+      d3.forceCollide().radius((d) => d.r * 1.2)
+    )
+    .force("center", d3.forceCenter(width / 2, height / 2))
     // .force('bounds', boxingForce)
-    .stop()
+    .stop();
 
-  return { simulation, nodes, links }
+  return { simulation, nodes, links };
 }
