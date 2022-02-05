@@ -1,6 +1,6 @@
-import { istarLayout } from '../index';
+import { istarLayout } from '../src';
 import * as d3 from 'd3-selection';
-import model from './piStarModel.json';
+import json from './piStarModel.json';
 import _ from 'lodash';
 import {
   Options,
@@ -10,6 +10,9 @@ import {
   D3Node,
   D3Link,
 } from '../src/layout';
+import { piStarModel } from '../src/piStar';
+
+const model = <piStarModel>json;
 
 const svg = d3
   .select('body')

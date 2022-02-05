@@ -7,7 +7,7 @@ import {
   D3Node,
   DataFormat,
 } from './layout';
-import { Link, NodeContainer, piStarModel } from '*.json';
+import { Link, NodeContainer, piStarModel } from './piStar';
 
 export function convert(data: DataFormat, options: ConvertOptions) {
   data = _.cloneDeep(data);

@@ -6,7 +6,7 @@ import {
   SimulationLinkDatum,
   SimulationNodeDatum,
 } from 'd3-force';
-import { piStarModel } from '*.json';
+import { piStarModel } from './piStar';
 
 export interface LayoutOptions {
   mode?: 'generator' | 'array' | 'first' | 'last';
