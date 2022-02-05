@@ -2,14 +2,15 @@
   "name": "istar-autolayout",
   "version": "1.1.0",
   "description": "🌟 An auto layout algorithm method for iStar models.",
-  "main": "src/index.ts",
+  "main": "dist/main.js",
   "scripts": {
     "webpack": "webpack --config webpack.config.js",
     "webpack-example": "webpack --config examples/typescript/webpack.config.js",
     "lint": "eslint src/* examples/* --quiet --fix"
   },
   "files": [
-    "src/*"
+    "src/*",
+    "dist/*"
   ],
   "repository": {
     "type": "git",
