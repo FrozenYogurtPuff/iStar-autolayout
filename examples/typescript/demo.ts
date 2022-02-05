@@ -1,4 +1,4 @@
-import { istarLayout } from '../src';
+import { istarLayout } from '../../src/index';
 import * as d3 from 'd3-selection';
 import json from './piStarModel.json';
 import _ from 'lodash';
@@ -9,8 +9,8 @@ import {
   ResultGenerator,
   D3Node,
   D3Link,
-} from '../src/layout';
-import { piStarModel } from '../src/piStar';
+} from '../../src/layout';
+import { piStarModel } from '../../src/piStar';
 
 const model = <piStarModel>json;
 

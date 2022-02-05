@@ -7,6 +7,7 @@ module.exports = {
   output: {
     filename: 'main.js',
     path: path.join(__dirname, 'dist'),
+    libraryTarget: 'global',
   },
   module: {
     rules: [
@@ -14,6 +15,20 @@ module.exports = {
         test: /\.tsx?$/,
         loader: 'ts-loader',
       },
+      {
+        test: require.resolve(path.join(__dirname, 'src/index.ts')),
+        loader: 'expose-loader',
+        options: {
+          exposes: ['istarLayout'],
+        },
+      },
+      {
+        test: require.resolve('lodash'),
+        loader: 'expose-loader',
+        options: {
+          exposes: ['_'],
+        },
+      }
     ],
   },
   resolve: {

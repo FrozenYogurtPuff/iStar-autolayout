@@ -19268,10 +19268,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 /***/ }),
 
-/***/ "./examples/demo.ts":
-/*!**************************!*\
-  !*** ./examples/demo.ts ***!
-  \**************************/
+/***/ "./examples/typescript/demo.ts":
+/*!*************************************!*\
+  !*** ./examples/typescript/demo.ts ***!
+  \*************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -19300,9 +19300,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const src_1 = __webpack_require__(/*! ../src */ "./src/index.ts");
+const index_1 = __webpack_require__(/*! ../../src/index */ "./src/index.ts");
 const d3 = __importStar(__webpack_require__(/*! d3-selection */ "./node_modules/d3-selection/src/index.js"));
-const piStarModel_json_1 = __importDefault(__webpack_require__(/*! ./piStarModel.json */ "./examples/piStarModel.json"));
+const piStarModel_json_1 = __importDefault(__webpack_require__(/*! ./piStarModel.json */ "./examples/typescript/piStarModel.json"));
 const lodash_1 = __importDefault(__webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js"));
 const model = piStarModel_json_1.default;
 const svg = d3
@@ -19351,13 +19351,13 @@ function first() {
             mode: 'first',
         },
     };
-    const firstInitial = (0, src_1.istarLayout)(model, firstOptions);
+    const firstInitial = (0, index_1.istarLayout)(model, firstOptions);
     initial(firstInitial.nodes, firstInitial.links);
 }
 function generator() {
     const generatorOptions = lodash_1.default.cloneDeep(commonOptions);
     generatorOptions.layout.mode = 'generator';
-    const generate = (0, src_1.istarLayout)(model, generatorOptions)();
+    const generate = (0, index_1.istarLayout)(model, generatorOptions)();
     let result = generate.next();
     let nodes, links;
     const check = function () {
@@ -19376,7 +19376,7 @@ function generator() {
 function array() {
     const arrayOptions = lodash_1.default.cloneDeep(commonOptions);
     arrayOptions.layout.mode = 'array';
-    const arr = (0, src_1.istarLayout)(model, arrayOptions);
+    const arr = (0, index_1.istarLayout)(model, arrayOptions);
     // use rAF, setInterval or d3 transition to handle the data
     lodash_1.default.forEach(arr, (item) => {
         initial(item.nodes, item.links);
@@ -19388,7 +19388,7 @@ function last() {
             mode: 'last',
         },
     };
-    const last = (0, src_1.istarLayout)(model, lastOptions);
+    const last = (0, index_1.istarLayout)(model, lastOptions);
     initial(last.nodes, last.links);
 }
 
@@ -21714,10 +21714,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./examples/piStarModel.json":
-/*!***********************************!*\
-  !*** ./examples/piStarModel.json ***!
-  \***********************************/
+/***/ "./examples/typescript/piStarModel.json":
+/*!**********************************************!*\
+  !*** ./examples/typescript/piStarModel.json ***!
+  \**********************************************/
 /***/ ((module) => {
 
 "use strict";
@@ -21809,7 +21809,7 @@ module.exports = JSON.parse('{"actors":[{"id":"a0ccee70-e7ff-44fd-9264-b1ccb34eb
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./examples/demo.ts");
+/******/ 	var __webpack_exports__ = __webpack_require__("./examples/typescript/demo.ts");
 /******/ 	
 /******/ })()
 ;
