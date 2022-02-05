@@ -1,0 +1,11 @@
+.link {
+  stroke: #000;
+  stroke-width: 2px;
+}
+
+.node {
+  cursor: move;
+  fill: #ccc;
+  stroke: #000;
+  stroke-width: 2px;
+}
