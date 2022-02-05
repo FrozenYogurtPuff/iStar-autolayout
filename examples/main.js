@@ -1,23 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./index.js":
-/*!******************!*\
-  !*** ./index.js ***!
-  \******************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "istarLayout": () => (/* reexport safe */ _src_layout__WEBPACK_IMPORTED_MODULE_0__.layout)
-/* harmony export */ });
-/* harmony import */ var _src_layout__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/layout */ "./src/layout.js");
-
-
-
-/***/ }),
-
 /***/ "./node_modules/d3-collection/src/entries.js":
 /*!***************************************************!*\
   !*** ./node_modules/d3-collection/src/entries.js ***!
@@ -19285,382 +19268,495 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 /***/ }),
 
-/***/ "./src/convert.js":
-/*!************************!*\
-  !*** ./src/convert.js ***!
-  \************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./examples/demo.ts":
+/*!**************************!*\
+  !*** ./examples/demo.ts ***!
+  \**************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "convert": () => (/* binding */ convert)
-/* harmony export */ });
-/* harmony import */ var _dictionary__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dictionary */ "./src/dictionary.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_1__);
 
-
-
-/**
- * Convert different format JSON into ordered nodes and links list.
- * @param data {object} - a piStar-format or d3-format JSON, depending on the value of options.mode
- * @param options {object} - convert options
- * @param options.mode {string} - 'piStar' or 'd3'
- * @param options.nodeName {string} - mapping piStar's node describe to standard format
- * @param options.nodeSize {string} - a dictionary about node size in piStar
- * @param options.linkName {string} - mapping piStar's link describe to standard format
- * @returns { {width, graph: {node: [], link: []}, height} }
- */
-function convert (data, options) {
-  data = lodash__WEBPACK_IMPORTED_MODULE_1___default().cloneDeep(data)
-  const mode = options?.mode ?? 'piStar'
-  const graph = { node: [], link: [] }
-
-  if (mode === 'piStar') {
-    /**
-     * Push the content into container when valid
-     * @param container
-     * @param content
-     */
-    function insert (container, content) {
-      if (content) {
-        container.push(content)
-      }
-    }
-
-    /**
-     * Handle various element based on its type
-     * @param obj {Object} - the source element item
-     * @param type {String} - element type, usually 'link' or 'node'
-     * @return { {r: number, collapsed: boolean | null, name: string, x: number, y: number,
-     *           id: string, type: string, width: number, height: number} |
-     *         {name: string, id: string, type: string, source: string, target: string} |
-     *         null }
-     */
-    function assign (obj, type) {
-      if (type === 'link') {
-        const id = obj.id
-        const sid = reverse[obj.source]
-        const tid = reverse[obj.target]
-
-        if (!sid || !tid) { throw Error('Cannot find source or target about ' + obj.id) }
-        if (sid === tid) { return null }
-
-        let name = ''
-        let desc = linkNameDict[obj.type]
-        if (desc === undefined) { throw Error('Illegal link name ' + obj.type + ' of ' + obj.id) }
-
-        // According to https://www.cin.ufpe.br/~if716/arquivos20161/Overview-iStar-20-Language-Guide.pdf
-        if (desc === 'P') {
-          desc = 'contribution'
-          const sty = lodash__WEBPACK_IMPORTED_MODULE_1___default().find(graph.node, { id: sid }).type
-          const tty = lodash__WEBPACK_IMPORTED_MODULE_1___default().find(graph.node, { id: tid }).type
-          if (sty === tty) { name = 'Is part of' } else { name = 'Plays' }
-        }
-        return { id: id, type: desc, name: name, source: sid, target: tid }
-      } else if (type === 'node') {
-        const desc = nodeNameDict[obj.type]
-        if (desc === undefined) { throw Error('Illegal node name ' + obj.type + ' of ' + obj.id) }
-        const id = obj.id
-        const name = obj.text
-        const x = obj.x
-        const y = obj.y
-        const [width, height] = nodeSizeDict[desc]
-        let collapsed = null
-
-        reverse[id] = id
-        if (obj.nodes) {
-          lodash__WEBPACK_IMPORTED_MODULE_1___default().forEach(obj.nodes, item => (reverse[item.id] = id))
-          collapsed = data.display[id] && data.display[id].collapsed
-        }
-
-        const r = (height > width ? height : width) / 2
-
-        return {
-          id: id,
-          name: name,
-          type: desc,
-          x: x,
-          y: y,
-          r: r,
-          width: width,
-          height: height,
-          collapsed: collapsed
-        }
-      } else {
-        throw Error('Unexpected assign procedure ' + type)
-      }
-    }
-
-    const reverse = {}
-    const width = data.diagram.width
-    const height = data.diagram.height
-
-    const nodeNameDict = options?.nodeName ?? _dictionary__WEBPACK_IMPORTED_MODULE_0__.nodeName
-    const nodeSizeDict = options?.nodeSize ?? _dictionary__WEBPACK_IMPORTED_MODULE_0__.nodeSize
-    const linkNameDict = options?.linkName ?? _dictionary__WEBPACK_IMPORTED_MODULE_0__.linkName
-
-    for (const d in data.dependencies) { insert(graph.node, assign(data.dependencies[d], 'node')) }
-    for (const a in data.actors) { insert(graph.node, assign(data.actors[a], 'node')) }
-    for (const o in data.orphans) { insert(graph.node, assign(data.orphans[o], 'node')) }
-    for (const l in data.links) { insert(graph.link, assign(data.links[l], 'link')) }
-
-    return { graph: graph, width: width, height: height }
-  } else if (mode === 'd3') {
-    const [width, height] = [options.width, options.height]
-    return { graph: data, width: width, height: height }
-  } else {
-    throw Error('Illegal file mode ' + mode)
-  }
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const src_1 = __webpack_require__(/*! ../src */ "./src/index.ts");
+const d3 = __importStar(__webpack_require__(/*! d3-selection */ "./node_modules/d3-selection/src/index.js"));
+const piStarModel_json_1 = __importDefault(__webpack_require__(/*! ./piStarModel.json */ "./examples/piStarModel.json"));
+const lodash_1 = __importDefault(__webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js"));
+const model = piStarModel_json_1.default;
+const svg = d3
+    .select('body')
+    .append('svg')
+    .attr('viewBox', [0, 0, model.diagram.width, model.diagram.height]);
+(_a = document
+    .getElementById('generator')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', generator);
+(_b = document.getElementById('array')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', array);
+(_c = document.getElementById('first')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', first);
+(_d = document.getElementById('last')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', last);
+first();
+function initial(nodes, links) {
+    svg
+        .selectAll('.link')
+        .data(links)
+        .join('line')
+        .classed('link', true)
+        .attr('x1', (d) => d.source.x)
+        .attr('y1', (d) => d.source.y)
+        .attr('x2', (d) => d.target.x)
+        .attr('y2', (d) => d.target.y);
+    svg
+        .selectAll('.node')
+        .data(nodes)
+        .join('circle')
+        .attr('r', 40)
+        .text((d) => d.name)
+        .classed('node', true)
+        .attr('cx', (d) => d.x)
+        .attr('cy', (d) => d.y);
+}
+const commonOptions = {
+    layout: {
+        tickPerEpoch: 5,
+        assureEpoch: 5,
+    },
+    convert: {
+        mode: 'piStar',
+    },
+    force: {},
+};
+function first() {
+    const firstOptions = {
+        layout: {
+            mode: 'first',
+        },
+    };
+    const firstInitial = (0, src_1.istarLayout)(model, firstOptions);
+    initial(firstInitial.nodes, firstInitial.links);
+}
+function generator() {
+    const generatorOptions = lodash_1.default.cloneDeep(commonOptions);
+    generatorOptions.layout.mode = 'generator';
+    const generate = (0, src_1.istarLayout)(model, generatorOptions)();
+    let result = generate.next();
+    let nodes, links;
+    const check = function () {
+        setTimeout(() => {
+            nodes = result.value.nodes;
+            links = result.value.links;
+            initial(nodes, links);
+            result = generate.next();
+            if (!result.done) {
+                check();
+            }
+        }, 100);
+    };
+    check();
+}
+function array() {
+    const arrayOptions = lodash_1.default.cloneDeep(commonOptions);
+    arrayOptions.layout.mode = 'array';
+    const arr = (0, src_1.istarLayout)(model, arrayOptions);
+    // use rAF, setInterval or d3 transition to handle the data
+    lodash_1.default.forEach(arr, (item) => {
+        initial(item.nodes, item.links);
+    });
+}
+function last() {
+    const lastOptions = {
+        layout: {
+            mode: 'last',
+        },
+    };
+    const last = (0, src_1.istarLayout)(model, lastOptions);
+    initial(last.nodes, last.links);
 }
 
 
 /***/ }),
 
-/***/ "./src/dictionary.js":
-/*!***************************!*\
-  !*** ./src/dictionary.js ***!
-  \***************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./src/convert.ts":
+/*!************************!*\
+  !*** ./src/convert.ts ***!
+  \************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "nodeName": () => (/* binding */ nodeName),
-/* harmony export */   "nodeSize": () => (/* binding */ nodeSize),
-/* harmony export */   "linkName": () => (/* binding */ linkName)
-/* harmony export */ });
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.convert = void 0;
+const dictionary_1 = __webpack_require__(/*! ./dictionary */ "./src/dictionary.ts");
+const lodash_1 = __importDefault(__webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js"));
+function convert(data, options) {
+    var _a, _b, _c, _d;
+    data = lodash_1.default.cloneDeep(data);
+    const mode = (_a = options === null || options === void 0 ? void 0 : options.mode) !== null && _a !== void 0 ? _a : 'piStar';
+    const graph = { nodes: [], links: [] };
+    if (mode === 'piStar') {
+        function insert(container, content) {
+            if (content) {
+                container.push(content);
+            }
+        }
+        function assign(obj, type) {
+            var _a, _b;
+            if (type === 'link') {
+                obj = obj;
+                data = data;
+                const id = obj.id;
+                const sid = reverse[obj.source];
+                const tid = reverse[obj.target];
+                if (!sid || !tid) {
+                    throw Error('Cannot find source or target about ' + obj.id);
+                }
+                let name = '';
+                let desc = linkNameDict[obj.type];
+                if (desc === undefined) {
+                    throw Error('Illegal link name ' + obj.type + ' of ' + obj.id);
+                }
+                // According to https://www.cin.ufpe.br/~if716/arquivos20161/Overview-iStar-20-Language-Guide.pdf
+                if (desc === 'P') {
+                    desc = 'contribution';
+                    const sty = (_a = lodash_1.default.find(graph.nodes, { id: sid })) === null || _a === void 0 ? void 0 : _a.type;
+                    const tty = (_b = lodash_1.default.find(graph.nodes, { id: tid })) === null || _b === void 0 ? void 0 : _b.type;
+                    if (!sty || !tty) {
+                        throw Error('Occur error when searching node types.');
+                    }
+                    if (sty === tty) {
+                        name = 'Is part of';
+                    }
+                    else {
+                        name = 'Plays';
+                    }
+                }
+                return {
+                    id: id,
+                    type: desc,
+                    name: name,
+                    source: sid,
+                    target: tid,
+                };
+            }
+            else if (type === 'node') {
+                data = data;
+                obj = obj;
+                const desc = nodeNameDict[obj.type];
+                if (desc === undefined) {
+                    throw Error('Illegal node name ' + obj.type + ' of ' + obj.id);
+                }
+                const id = obj.id;
+                const name = obj.text;
+                const x = obj.x;
+                const y = obj.y;
+                const [width, height] = nodeSizeDict[desc];
+                reverse[id] = id;
+                if (obj.nodes) {
+                    lodash_1.default.forEach(obj.nodes, (item) => (reverse[item.id] = id));
+                }
+                const r = (height > width ? height : width) / 2;
+                return {
+                    id: id,
+                    name: name,
+                    type: desc,
+                    x: x,
+                    y: y,
+                    r: r,
+                    width: width,
+                    height: height,
+                };
+            }
+            else {
+                throw Error('Unexpected assign procedure ' + type);
+            }
+        }
+        data = data;
+        const reverse = {};
+        const width = data.diagram.width;
+        const height = data.diagram.height;
+        const nodeNameDict = (_b = options === null || options === void 0 ? void 0 : options.nodeName) !== null && _b !== void 0 ? _b : dictionary_1.nodeName;
+        const nodeSizeDict = (_c = options === null || options === void 0 ? void 0 : options.nodeSize) !== null && _c !== void 0 ? _c : dictionary_1.nodeSize;
+        const linkNameDict = (_d = options === null || options === void 0 ? void 0 : options.linkName) !== null && _d !== void 0 ? _d : dictionary_1.linkName;
+        for (const d in data.dependencies) {
+            insert(graph.nodes, assign(data.dependencies[d], 'node'));
+        }
+        for (const a in data.actors) {
+            insert(graph.nodes, assign(data.actors[a], 'node'));
+        }
+        for (const o in data.orphans) {
+            insert(graph.nodes, assign(data.orphans[o], 'node'));
+        }
+        for (const l in data.links) {
+            insert(graph.links, assign(data.links[l], 'link'));
+        }
+        return { graph: graph, width: width, height: height };
+    }
+    else if (mode === 'd3') {
+        data = data;
+        const [width, height] = [options.width, options.height];
+        return { graph: data, width: width, height: height };
+    }
+    else {
+        throw Error('Illegal file mode ' + mode);
+    }
+}
+exports.convert = convert;
+
+
+/***/ }),
+
+/***/ "./src/dictionary.ts":
+/*!***************************!*\
+  !*** ./src/dictionary.ts ***!
+  \***************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
 // Mainly based on piStar mapping
 // About piStar, please refer to https://github.com/jhcp/pistar
-
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.linkName = exports.nodeSize = exports.nodeName = void 0;
 const nodeName = {
-  'istar.Actor': 'actor',
-  'istar.Agent': 'agent',
-  'istar.Resource': 'resource',
-  'istar.Quality': 'softgoal',
-  'istar.Role': 'role',
-  'istar.Task': 'task',
-  'istar.Goal': 'goal'
-}
-
+    'istar.Actor': 'actor',
+    'istar.Agent': 'agent',
+    'istar.Resource': 'resource',
+    'istar.Quality': 'softgoal',
+    'istar.Role': 'role',
+    'istar.Task': 'task',
+    'istar.Goal': 'goal',
+};
+exports.nodeName = nodeName;
 const nodeSize = {
-  // from shape.js
-  actor: [80, 80],
-  agent: [80, 80],
-  role: [80, 80],
-  goal: [90, 35],
-  resource: [90, 35],
-  task: [95, 36],
-  softgoal: [90, 55]
-}
-
+    // from shape.js
+    actor: [80, 80],
+    agent: [80, 80],
+    role: [80, 80],
+    goal: [90, 35],
+    resource: [90, 35],
+    task: [95, 36],
+    softgoal: [90, 55],
+};
+exports.nodeSize = nodeSize;
 const linkName = {
-  'istar.IsALink': 'ISA',
-  'istar.ParticipatesInLink': 'P',
-  'istar.DependencyLink': 'd',
-  'istar.AndRefinementLink': 'and-d',
-  'istar.OrRefinementLink': 'or-d',
-  'istar.ContributionLink': 'contribution'
-}
-
-
+    'istar.IsALink': 'ISA',
+    'istar.ParticipatesInLink': 'P',
+    'istar.DependencyLink': 'd',
+    'istar.AndRefinementLink': 'and-d',
+    'istar.OrRefinementLink': 'or-d',
+    'istar.ContributionLink': 'contribution',
+};
+exports.linkName = linkName;
 
 
 /***/ }),
 
-/***/ "./src/force.sd.js":
+/***/ "./src/force.sd.ts":
 /*!*************************!*\
-  !*** ./src/force.sd.js ***!
+  !*** ./src/force.sd.ts ***!
   \*************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "force": () => (/* binding */ force)
-/* harmony export */ });
-/* harmony import */ var d3_force__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3-force */ "./node_modules/d3-force/index.js");
 
-
-/**
- * Use d3-force to implement the force layout algorithm
- * @param data {object} - an object with ordered node and link list
- * @param options {object} - force options
- * @param options.forceValue {number} - force value, 50 by default
- * @param options.width {number} - diagram width
- * @param options.height {number} - diagram height
- * @param options.radius {number} - a common radius for tuning parameters
- * @return { {simulation: object, nodes: [], links: []} }
- */
-function force (data, options) {
-  const nodes = data.node
-  const links = data.link
-  const value = options?.forceValue ?? 50
-  const [width, height] = [options.width, options.height]
-  // const radius = options?.commonRadius ?? 50
-
-  // function boxingForce () {
-  //   for (const d of nodes) {
-  //     // Of the positions exceed the box, set them to the boundary position.
-  //     // You may want to include your nodes width to not overlap with the box.
-  //     d.x = Math.max(d.r + radius, d.x)
-  //     d.x = Math.min(width - d.r, d.x)
-  //     d.y = Math.max(d.r + radius, d.y)
-  //     d.y = Math.min(height - d.r, d.y)
-  //   }
-  // }
-
-  const simulation = d3_force__WEBPACK_IMPORTED_MODULE_0__.forceSimulation(nodes)
-    .force('link', d3_force__WEBPACK_IMPORTED_MODULE_0__.forceLink(links).id(d => d.id).distance(l => (l.source.r + l.target.r)))
-    .force('charge', d3_force__WEBPACK_IMPORTED_MODULE_0__.forceManyBody()
-      .distanceMin(value * 2)
-      .distanceMax(value * 10)
-      .strength(-value * 20))
-    // .force('charge', d3.forceManyBody()
-    //   .distanceMin(d => d.r)
-    //   .distanceMax(d => d.r * 5)
-    //   .strength(d => Math.sqrt(d.r) * -1))
-    // .force('radius', d3.forceCollide(radius * 1.25))
-    .force('radius', d3_force__WEBPACK_IMPORTED_MODULE_0__.forceCollide()
-      .radius(d => d.r * 1.2))
-    .force('center', d3_force__WEBPACK_IMPORTED_MODULE_0__.forceCenter(width / 2, height / 2))
-    // .force('bounds', boxingForce)
-    .stop()
-
-  return { simulation, nodes, links }
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.force = void 0;
+const d3 = __importStar(__webpack_require__(/*! d3-force */ "./node_modules/d3-force/index.js"));
+function force(data, options) {
+    var _a;
+    const nodes = data.nodes;
+    const links = data.links;
+    const value = (_a = options === null || options === void 0 ? void 0 : options.forceValue) !== null && _a !== void 0 ? _a : 50;
+    const [width, height] = [options.width, options.height];
+    // const radius = options?.commonRadius ?? 50
+    // function boxingForce () {
+    //   for (const d of nodes) {
+    //     // Of the positions exceed the box, set them to the boundary position.
+    //     // You may want to include your nodes width to not overlap with the box.
+    //     d.x = Math.max(d.r + radius, d.x)
+    //     d.x = Math.min(width - d.r, d.x)
+    //     d.y = Math.max(d.r + radius, d.y)
+    //     d.y = Math.min(height - d.r, d.y)
+    //   }
+    // }
+    const simulation = d3
+        .forceSimulation(nodes)
+        .force('link', d3
+        .forceLink(links)
+        .id((d) => d.id)
+        .distance((l) => l.source.r + l.target.r))
+        .force('charge', d3
+        .forceManyBody()
+        .distanceMin(value * 2)
+        .distanceMax(value * 10)
+        .strength(-value * 20))
+        // .force('charge', d3.forceManyBody()
+        //   .distanceMin(d => d.r)
+        //   .distanceMax(d => d.r * 5)
+        //   .strength(d => Math.sqrt(d.r) * -1))
+        // .force('radius', d3.forceCollide(radius * 1.25))
+        .force('radius', d3.forceCollide().radius((d) => d.r * 1.2))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        // .force('bounds', boxingForce)
+        .stop();
+    return { simulation, nodes, links };
 }
+exports.force = force;
 
 
 /***/ }),
 
-/***/ "./src/layout.js":
-/*!***********************!*\
-  !*** ./src/layout.js ***!
-  \***********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./src/index.ts":
+/*!**********************!*\
+  !*** ./src/index.ts ***!
+  \**********************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "layout": () => (/* binding */ layout)
-/* harmony export */ });
-/* harmony import */ var _convert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./convert */ "./src/convert.js");
-/* harmony import */ var _force_sd__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./force.sd */ "./src/force.sd.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_2__);
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.istarLayout = void 0;
+var layout_1 = __webpack_require__(/*! ./layout */ "./src/layout.ts");
+Object.defineProperty(exports, "istarLayout", ({ enumerable: true, get: function () { return layout_1.layout; } }));
 
 
+/***/ }),
 
+/***/ "./src/layout.ts":
+/*!***********************!*\
+  !*** ./src/layout.ts ***!
+  \***********************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-/**
- * Main entrypoint for layout handling
- * @param data {object} - a piStar-format or d3-format JSON
- * @param options {object | null} - the options collection
- *
- * @param options.layout {object} - layout options
- * @param options.layout.mode {string} - layout return data format, usually 'generator', 'array', 'first' or 'last'
- * @param options.layout.tickPerEpoch {number} - ticks per iteration epoch
- * @param options.layout.assureEpoch {number} - assure at least iterate epochs
- * @param options.layout.stopWhenStable {boolean} - do not stop until stable (alpha value under a threshold)
- * @param options.layout.width {number} - diagram width
- * @param options.layout.height {number} - diagram height
- *
- * @param options.convert {object} - convert options
- * @param options.force {object} - force options
- * @return { (function(): Generator<{current: number, nodes: [], links: []}, void, *>) |
- *          {current: number, nodes: [], links: []} | {current: number, nodes: [], links: []}[] }
- */
-function layout (data, options) {
-  const lOptions = options?.layout ?? { }
-  const cOptions = options?.convert ?? { }
-  const fOptions = options?.force ?? { }
+"use strict";
 
-  const mode = lOptions?.mode ?? 'generator'
-  const tick = lOptions?.tickPerEpoch ?? 50
-  const epoch = lOptions?.assureEpoch ?? 20
-  const stable = lOptions?.stopWhenStable ?? true
-
-  const jsonData = (0,_convert__WEBPACK_IMPORTED_MODULE_0__.convert)(data, cOptions)
-  if (!(fOptions?.width && fOptions?.height)) {
-    if ((lOptions?.width && lOptions?.height)) {
-      [fOptions.width, fOptions.height] = [lOptions.width, lOptions.height]
-    } else {
-      [fOptions.width, fOptions.height] = [jsonData.width, jsonData.height]
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.layout = void 0;
+const convert_1 = __webpack_require__(/*! ./convert */ "./src/convert.ts");
+const force_sd_1 = __webpack_require__(/*! ./force.sd */ "./src/force.sd.ts");
+const lodash_1 = __importDefault(__webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js"));
+function layout(data, options) {
+    var _a, _b, _c, _d, _e, _f, _g;
+    const lOptions = (_a = options === null || options === void 0 ? void 0 : options.layout) !== null && _a !== void 0 ? _a : {};
+    const cOptions = (_b = options === null || options === void 0 ? void 0 : options.convert) !== null && _b !== void 0 ? _b : {};
+    const fOptions = (_c = options === null || options === void 0 ? void 0 : options.force) !== null && _c !== void 0 ? _c : {};
+    const mode = (_d = lOptions === null || lOptions === void 0 ? void 0 : lOptions.mode) !== null && _d !== void 0 ? _d : 'generator';
+    const tick = (_e = lOptions === null || lOptions === void 0 ? void 0 : lOptions.tickPerEpoch) !== null && _e !== void 0 ? _e : 50;
+    const epoch = (_f = lOptions === null || lOptions === void 0 ? void 0 : lOptions.assureEpoch) !== null && _f !== void 0 ? _f : 20;
+    const stable = (_g = lOptions === null || lOptions === void 0 ? void 0 : lOptions.stopWhenStable) !== null && _g !== void 0 ? _g : true;
+    const jsonData = (0, convert_1.convert)(data, cOptions);
+    if (!((fOptions === null || fOptions === void 0 ? void 0 : fOptions.width) && (fOptions === null || fOptions === void 0 ? void 0 : fOptions.height))) {
+        if ((lOptions === null || lOptions === void 0 ? void 0 : lOptions.width) && (lOptions === null || lOptions === void 0 ? void 0 : lOptions.height)) {
+            [fOptions.width, fOptions.height] = [
+                lOptions.width,
+                lOptions.height,
+            ];
+        }
+        else {
+            [fOptions.width, fOptions.height] = [
+                jsonData.width,
+                jsonData.height,
+            ];
+        }
     }
-  }
-
-  const forceResult = (0,_force_sd__WEBPACK_IMPORTED_MODULE_1__.force)(lodash__WEBPACK_IMPORTED_MODULE_2___default().cloneDeep(jsonData.graph), fOptions)
-  const { simulation, nodes, links } = forceResult
-
-  let current = 0
-
-  /**
-   * Simulate an epoch
-   * @param tick {number} - ticks per iteration epoch
-   */
-  function simulationEpoch (tick) {
-    for (let i = 0; i < tick; i++) {
-      simulation.tick()
+    const forceResult = (0, force_sd_1.force)(lodash_1.default.cloneDeep(jsonData.graph), fOptions);
+    const { simulation, nodes, links } = forceResult;
+    let current = 0;
+    function simulationEpoch(tick) {
+        for (let i = 0; i < tick; i++) {
+            simulation.tick();
+        }
     }
-  }
-
-  /**
-   * Check if the iteration keep going
-   * @param current {number} - current iteration epoch
-   * @param atLeastEpoch {number} - assure at least iterate epochs
-   * @param needStable {boolean} - do not stop until stable (alpha value under a threshold)
-   * @param simulation {object} - d3-force simulation object
-   * @return {boolean} - keep iterate
-   */
-  function keep (current, atLeastEpoch, needStable, simulation) {
-    return ((current < atLeastEpoch) || (needStable && simulation.alpha() >= 0.001))
-  }
-
-  /**
-   * A Generator factory for output
-   * @return { Generator<{current: number, nodes: [], links: []}, void, *> }
-   */
-  function * generator () {
-    while (keep(current, epoch, stable, simulation)) {
-      simulationEpoch(tick)
-      current += 1
-      yield { current, nodes, links }
+    function keep(current, atLeastEpoch, needStable, simulation) {
+        return (current < atLeastEpoch ||
+            (needStable && simulation.alpha() >= 0.001));
     }
-  }
-
-  /**
-   * Gather the position data for output
-   * @param mode {string} - 'array', 'first' or 'last'
-   * @return { {current: number, nodes: [], links: []} | [] }
-   */
-  function generalOutput (mode) {
-    if (mode === 'first') {
-      return { current: 0, nodes, links }
+    function* generator() {
+        while (keep(current, epoch, stable, simulation)) {
+            simulationEpoch(tick);
+            current += 1;
+            yield { current, nodes, links };
+        }
     }
-    const results = []
-    while (keep(current, epoch, stable, simulation)) {
-      simulationEpoch(tick)
-      current += 1
-      if (mode === 'array') {
-        results.push(lodash__WEBPACK_IMPORTED_MODULE_2___default().cloneDeep({ current, nodes, links }))
-      }
+    function generalOutput(mode) {
+        if (mode === 'first') {
+            return { current: 0, nodes, links };
+        }
+        const results = [];
+        while (keep(current, epoch, stable, simulation)) {
+            simulationEpoch(tick);
+            current += 1;
+            if (mode === 'array') {
+                results.push(lodash_1.default.cloneDeep({ current, nodes, links }));
+            }
+        }
+        if (mode === 'array') {
+            return results;
+        }
+        else if (mode === 'last') {
+            return lodash_1.default.cloneDeep({ current, nodes, links });
+        }
+        else {
+            throw Error('Illegal output mode name ' + mode);
+        }
     }
-    if (mode === 'array') {
-      return results
-    } else if (mode === 'last') {
-      return lodash__WEBPACK_IMPORTED_MODULE_2___default().cloneDeep({ current, nodes, links })
+    if (mode === 'generator') {
+        return generator;
     }
-  }
-
-  if (mode === 'generator') {
-    return generator
-  } else if (mode === 'array' || mode === 'last' || mode === 'first') {
-    return generalOutput(mode)
-  } else {
-    throw Error('Illegal result format ' + mode)
-  }
+    else if (mode === 'array' ||
+        mode === 'last' ||
+        mode === 'first') {
+        return generalOutput(mode);
+    }
+    else {
+        throw Error('Illegal result format ' + mode);
+    }
 }
+exports.layout = layout;
 
 
 /***/ }),
@@ -19709,6 +19805,29 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/d3-selection/src/create.js":
+/*!*************************************************!*\
+  !*** ./node_modules/d3-selection/src/create.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _creator_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./creator.js */ "./node_modules/d3-selection/src/creator.js");
+/* harmony import */ var _select_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./select.js */ "./node_modules/d3-selection/src/select.js");
+
+
+
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(name) {
+  return (0,_select_js__WEBPACK_IMPORTED_MODULE_0__["default"])((0,_creator_js__WEBPACK_IMPORTED_MODULE_1__["default"])(name).call(document.documentElement));
+}
+
+
+/***/ }),
+
 /***/ "./node_modules/d3-selection/src/creator.js":
 /*!**************************************************!*\
   !*** ./node_modules/d3-selection/src/creator.js ***!
@@ -19747,6 +19866,107 @@ function creatorFixed(fullname) {
       ? creatorFixed
       : creatorInherit)(fullname);
 }
+
+
+/***/ }),
+
+/***/ "./node_modules/d3-selection/src/index.js":
+/*!************************************************!*\
+  !*** ./node_modules/d3-selection/src/index.js ***!
+  \************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* reexport safe */ _create_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "creator": () => (/* reexport safe */ _creator_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "local": () => (/* reexport safe */ _local_js__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   "matcher": () => (/* reexport safe */ _matcher_js__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   "namespace": () => (/* reexport safe */ _namespace_js__WEBPACK_IMPORTED_MODULE_4__["default"]),
+/* harmony export */   "namespaces": () => (/* reexport safe */ _namespaces_js__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   "pointer": () => (/* reexport safe */ _pointer_js__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   "pointers": () => (/* reexport safe */ _pointers_js__WEBPACK_IMPORTED_MODULE_7__["default"]),
+/* harmony export */   "select": () => (/* reexport safe */ _select_js__WEBPACK_IMPORTED_MODULE_8__["default"]),
+/* harmony export */   "selectAll": () => (/* reexport safe */ _selectAll_js__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   "selection": () => (/* reexport safe */ _selection_index_js__WEBPACK_IMPORTED_MODULE_10__["default"]),
+/* harmony export */   "selector": () => (/* reexport safe */ _selector_js__WEBPACK_IMPORTED_MODULE_11__["default"]),
+/* harmony export */   "selectorAll": () => (/* reexport safe */ _selectorAll_js__WEBPACK_IMPORTED_MODULE_12__["default"]),
+/* harmony export */   "style": () => (/* reexport safe */ _selection_style_js__WEBPACK_IMPORTED_MODULE_13__.styleValue),
+/* harmony export */   "window": () => (/* reexport safe */ _window_js__WEBPACK_IMPORTED_MODULE_14__["default"])
+/* harmony export */ });
+/* harmony import */ var _create_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./create.js */ "./node_modules/d3-selection/src/create.js");
+/* harmony import */ var _creator_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./creator.js */ "./node_modules/d3-selection/src/creator.js");
+/* harmony import */ var _local_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./local.js */ "./node_modules/d3-selection/src/local.js");
+/* harmony import */ var _matcher_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./matcher.js */ "./node_modules/d3-selection/src/matcher.js");
+/* harmony import */ var _namespace_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./namespace.js */ "./node_modules/d3-selection/src/namespace.js");
+/* harmony import */ var _namespaces_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./namespaces.js */ "./node_modules/d3-selection/src/namespaces.js");
+/* harmony import */ var _pointer_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pointer.js */ "./node_modules/d3-selection/src/pointer.js");
+/* harmony import */ var _pointers_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./pointers.js */ "./node_modules/d3-selection/src/pointers.js");
+/* harmony import */ var _select_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./select.js */ "./node_modules/d3-selection/src/select.js");
+/* harmony import */ var _selectAll_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./selectAll.js */ "./node_modules/d3-selection/src/selectAll.js");
+/* harmony import */ var _selection_index_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./selection/index.js */ "./node_modules/d3-selection/src/selection/index.js");
+/* harmony import */ var _selector_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./selector.js */ "./node_modules/d3-selection/src/selector.js");
+/* harmony import */ var _selectorAll_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./selectorAll.js */ "./node_modules/d3-selection/src/selectorAll.js");
+/* harmony import */ var _selection_style_js__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./selection/style.js */ "./node_modules/d3-selection/src/selection/style.js");
+/* harmony import */ var _window_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./window.js */ "./node_modules/d3-selection/src/window.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/d3-selection/src/local.js":
+/*!************************************************!*\
+  !*** ./node_modules/d3-selection/src/local.js ***!
+  \************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ local)
+/* harmony export */ });
+var nextId = 0;
+
+function local() {
+  return new Local;
+}
+
+function Local() {
+  this._ = "@" + (++nextId).toString(36);
+}
+
+Local.prototype = local.prototype = {
+  constructor: Local,
+  get: function(node) {
+    var id = this._;
+    while (!(id in node)) if (!(node = node.parentNode)) return;
+    return node[id];
+  },
+  set: function(node, value) {
+    return node[this._] = value;
+  },
+  remove: function(node) {
+    return this._ in node && delete node[this._];
+  },
+  toString: function() {
+    return this._;
+  }
+};
 
 
 /***/ }),
@@ -19827,6 +20047,70 @@ var xhtml = "http://www.w3.org/1999/xhtml";
 
 /***/ }),
 
+/***/ "./node_modules/d3-selection/src/pointer.js":
+/*!**************************************************!*\
+  !*** ./node_modules/d3-selection/src/pointer.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _sourceEvent_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./sourceEvent.js */ "./node_modules/d3-selection/src/sourceEvent.js");
+
+
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(event, node) {
+  event = (0,_sourceEvent_js__WEBPACK_IMPORTED_MODULE_0__["default"])(event);
+  if (node === undefined) node = event.currentTarget;
+  if (node) {
+    var svg = node.ownerSVGElement || node;
+    if (svg.createSVGPoint) {
+      var point = svg.createSVGPoint();
+      point.x = event.clientX, point.y = event.clientY;
+      point = point.matrixTransform(node.getScreenCTM().inverse());
+      return [point.x, point.y];
+    }
+    if (node.getBoundingClientRect) {
+      var rect = node.getBoundingClientRect();
+      return [event.clientX - rect.left - node.clientLeft, event.clientY - rect.top - node.clientTop];
+    }
+  }
+  return [event.pageX, event.pageY];
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/d3-selection/src/pointers.js":
+/*!***************************************************!*\
+  !*** ./node_modules/d3-selection/src/pointers.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _pointer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pointer.js */ "./node_modules/d3-selection/src/pointer.js");
+/* harmony import */ var _sourceEvent_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./sourceEvent.js */ "./node_modules/d3-selection/src/sourceEvent.js");
+
+
+
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(events, node) {
+  if (events.target) { // i.e., instanceof Event, not TouchList or iterable
+    events = (0,_sourceEvent_js__WEBPACK_IMPORTED_MODULE_0__["default"])(events);
+    if (node === undefined) node = events.currentTarget;
+    events = events.touches || [events];
+  }
+  return Array.from(events, event => (0,_pointer_js__WEBPACK_IMPORTED_MODULE_1__["default"])(event, node));
+}
+
+
+/***/ }),
+
 /***/ "./node_modules/d3-selection/src/select.js":
 /*!*************************************************!*\
   !*** ./node_modules/d3-selection/src/select.js ***!
@@ -19845,6 +20129,31 @@ __webpack_require__.r(__webpack_exports__);
   return typeof selector === "string"
       ? new _selection_index_js__WEBPACK_IMPORTED_MODULE_0__.Selection([[document.querySelector(selector)]], [document.documentElement])
       : new _selection_index_js__WEBPACK_IMPORTED_MODULE_0__.Selection([[selector]], _selection_index_js__WEBPACK_IMPORTED_MODULE_0__.root);
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/d3-selection/src/selectAll.js":
+/*!****************************************************!*\
+  !*** ./node_modules/d3-selection/src/selectAll.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _array_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./array.js */ "./node_modules/d3-selection/src/array.js");
+/* harmony import */ var _selection_index_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./selection/index.js */ "./node_modules/d3-selection/src/selection/index.js");
+
+
+
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(selector) {
+  return typeof selector === "string"
+      ? new _selection_index_js__WEBPACK_IMPORTED_MODULE_0__.Selection([document.querySelectorAll(selector)], [document.documentElement])
+      : new _selection_index_js__WEBPACK_IMPORTED_MODULE_0__.Selection([(0,_array_js__WEBPACK_IMPORTED_MODULE_1__["default"])(selector)], _selection_index_js__WEBPACK_IMPORTED_MODULE_0__.root);
 }
 
 
@@ -21365,6 +21674,26 @@ function empty() {
 
 /***/ }),
 
+/***/ "./node_modules/d3-selection/src/sourceEvent.js":
+/*!******************************************************!*\
+  !*** ./node_modules/d3-selection/src/sourceEvent.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(event) {
+  let sourceEvent;
+  while (sourceEvent = event.sourceEvent) event = sourceEvent;
+  return event;
+}
+
+
+/***/ }),
+
 /***/ "./node_modules/d3-selection/src/window.js":
 /*!*************************************************!*\
   !*** ./node_modules/d3-selection/src/window.js ***!
@@ -21426,18 +21755,6 @@ module.exports = JSON.parse('{"actors":[{"id":"a0ccee70-e7ff-44fd-9264-b1ccb34eb
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -21488,115 +21805,12 @@ module.exports = JSON.parse('{"actors":[{"id":"a0ccee70-e7ff-44fd-9264-b1ccb34eb
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-/*!**************************!*\
-  !*** ./examples/demo.js ***!
-  \**************************/
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../index */ "./index.js");
-/* harmony import */ var d3_selection__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! d3-selection */ "./node_modules/d3-selection/src/select.js");
-/* harmony import */ var _piStarModel_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./piStarModel.json */ "./examples/piStarModel.json");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_2__);
-
-
-
-
-
-const svg = d3_selection__WEBPACK_IMPORTED_MODULE_3__["default"]('body').append('svg').attr('viewBox', [0, 0, _piStarModel_json__WEBPACK_IMPORTED_MODULE_1__.diagram.width, _piStarModel_json__WEBPACK_IMPORTED_MODULE_1__.diagram.height])
-document.getElementById('generator').addEventListener('click', generator)
-document.getElementById('array').addEventListener('click', array)
-document.getElementById('first').addEventListener('click', first)
-document.getElementById('last').addEventListener('click', last)
-first()
-
-function initial (nodes, links) {
-  svg
-    .selectAll('.link')
-    .data(links)
-    .join('line')
-    .classed('link', true)
-    .attr('x1', d => d.source.x)
-    .attr('y1', d => d.source.y)
-    .attr('x2', d => d.target.x)
-    .attr('y2', d => d.target.y)
-  svg
-    .selectAll('.node')
-    .data(nodes)
-    .join('circle')
-    .attr('r', 40)
-    .text(d => d.names)
-    .classed('node', true)
-    .attr('cx', d => d.x)
-    .attr('cy', d => d.y)
-}
-
-const commonOptions = {
-  layout: {
-    tickPerEpoch: 5,
-    assureEpoch: 5
-  },
-  convert: {
-    mode: 'piStar'
-  },
-  force: { }
-}
-
-function first () {
-  const firstOptions = {
-    layout: {
-      mode: 'first'
-    }
-  }
-  const firstInitial = (0,_index__WEBPACK_IMPORTED_MODULE_0__.istarLayout)(_piStarModel_json__WEBPACK_IMPORTED_MODULE_1__, firstOptions)
-  initial(firstInitial.nodes, firstInitial.links)
-}
-
-function generator () {
-  const generatorOptions = lodash__WEBPACK_IMPORTED_MODULE_2___default().cloneDeep(commonOptions)
-  generatorOptions.layout.mode = 'generator'
-  const generate = (0,_index__WEBPACK_IMPORTED_MODULE_0__.istarLayout)(_piStarModel_json__WEBPACK_IMPORTED_MODULE_1__, generatorOptions)()
-  let result = generate.next()
-  let nodes, links
-  const check = function () {
-    setTimeout(() => {
-      nodes = result.value.nodes
-      links = result.value.links
-      initial(nodes, links)
-      result = generate.next()
-      if (!result.done) {
-        check()
-      }
-    }, 100)
-  }
-  check()
-}
-
-function array () {
-  const arrayOptions = lodash__WEBPACK_IMPORTED_MODULE_2___default().cloneDeep(commonOptions)
-  arrayOptions.layout.mode = 'array'
-  const arr = (0,_index__WEBPACK_IMPORTED_MODULE_0__.istarLayout)(_piStarModel_json__WEBPACK_IMPORTED_MODULE_1__, arrayOptions)
-  // use rAF, setInterval or d3 transition to handle the data
-  lodash__WEBPACK_IMPORTED_MODULE_2___default().forEach(arr, item => {
-    initial(item.nodes, item.links)
-  })
-}
-
-function last () {
-  const lastOptions = {
-    layout: {
-      mode: 'last'
-    }
-  }
-  const last = (0,_index__WEBPACK_IMPORTED_MODULE_0__.istarLayout)(_piStarModel_json__WEBPACK_IMPORTED_MODULE_1__, lastOptions)
-  initial(last.nodes, last.links)
-}
-
-})();
-
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__("./examples/demo.ts");
+/******/ 	
 /******/ })()
 ;
 //# sourceMappingURL=main.js.map
