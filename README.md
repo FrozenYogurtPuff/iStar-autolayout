@@ -9,7 +9,7 @@
 ## Install
 ### via npm
 ```bash
-$ npm -i istar-autolayout
+$ npm i istar-autolayout
 ```
 ### via Git
 ```bash
@@ -35,7 +35,7 @@ while (!result.done) {
 Please refer to [examples/javascript](https://github.com/FrozenYogurtPuff/iStar-autolayout/tree/main/examples/javascript) for more.
 
 #### TypeScript
-1. Include the script via `import { istarLayout } from 'src/index' `
+1. Include the script via `import { istarLayout } from 'istar-autolayout' `
 2. Use `istarLayout` with typed and re-bundle all the files on demand.
 
 Please refer to [examples/typescript](https://github.com/FrozenYogurtPuff/iStar-autolayout/tree/main/examples/typescript) for more.
