@@ -1,18 +1,9 @@
-import * as d3 from "d3-force";
+import * as d3 from 'd3-force';
+import { D3Data, D3Link, D3Node, ForceOptions } from './layout';
 
-/**
- * Use d3-force to implement the force layout algorithm
- * @param data {object} - an object with ordered node and link list
- * @param options {object} - force options
- * @param options.forceValue {number} - force value, 50 by default
- * @param options.width {number} - diagram width
- * @param options.height {number} - diagram height
- * @param options.radius {number} - a common radius for tuning parameters
- * @return { {simulation: object, nodes: [], links: []} }
- */
-export function force(data, options) {
-  const nodes = data.node;
-  const links = data.link;
+export function force(data: D3Data, options: ForceOptions) {
+  const nodes = data.nodes;
+  const links = data.links;
   const value = options?.forceValue ?? 50;
   const [width, height] = [options.width, options.height];
   // const radius = options?.commonRadius ?? 50
@@ -31,19 +22,19 @@ export function force(data, options) {
   const simulation = d3
     .forceSimulation(nodes)
     .force(
-      "link",
+      'link',
       d3
-        .forceLink(links)
+        .forceLink<D3Node, D3Link>(links)
         .id((d) => d.id)
-        .distance((l) => l.source.r + l.target.r)
+        .distance((l) => (<D3Node>l.source).r + (<D3Node>l.target).r),
     )
     .force(
-      "charge",
+      'charge',
       d3
         .forceManyBody()
         .distanceMin(value * 2)
         .distanceMax(value * 10)
-        .strength(-value * 20)
+        .strength(-value * 20),
     )
     // .force('charge', d3.forceManyBody()
     //   .distanceMin(d => d.r)
@@ -51,10 +42,10 @@ export function force(data, options) {
     //   .strength(d => Math.sqrt(d.r) * -1))
     // .force('radius', d3.forceCollide(radius * 1.25))
     .force(
-      "radius",
-      d3.forceCollide().radius((d) => d.r * 1.2)
+      'radius',
+      d3.forceCollide<D3Node>().radius((d) => d.r * 1.2),
     )
-    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force('center', d3.forceCenter(width! / 2, height! / 2))
     // .force('bounds', boxingForce)
     .stop();
 
